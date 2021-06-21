@@ -82,13 +82,13 @@ class TweetDfExtractor:
         return is_sensitive
 
     def find_favourite_count(self)->list:
-        favourite_count =  [tw.get('users', {}).get('favourites_count', 0) for tw in self.tweets_list]
+        favourite_count =  [tw.get('retweeted_status', {}).get('favourites_count', 0) for tw in self.tweets_list]
         
         return favourite_count
         
     
     def find_retweet_count(self)->list:
-        retweet_count = [tw.get('retweet_count', None) for tw in self.tweets_list]
+        retweet_count = [tw.get('retweeted_status', {}).get('retweet_count') for tw in self.tweets_list]
         
         return retweet_count
 
