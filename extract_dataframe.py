@@ -108,10 +108,13 @@ class TweetDfExtractor:
     def find_hashtags(self) -> list:
         hashtags = [tw.get('entities', {}).get('hashtags', None)
                     for tw in self.tweets_list]
+        return hashtags
 
     def find_mentions(self) -> list:
         mentions = [tw.get('entities', {}).get('user_mentions', None)
                     for tw in self.tweets_list]
+        return mentions
+
 
     def find_location(self) -> list:
         location = [tw.get('user', {}).get('location', None)

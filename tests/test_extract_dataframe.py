@@ -1,10 +1,13 @@
 import os
-import pandas as pd
-import unittest
-from ..extract_dataframe import read_json, 
-from ..extract_dataframe import TweetDfExtractor
 import sys
+import unittest
+import pandas as pd
 sys.path.append(os.path.abspath(os.path.join('..')))
+
+from extract_dataframe import read_json
+from extract_dataframe import TweetDfExtractor
+
+
 
 
 _, tweet_list = read_json("../data/covid19.json")
