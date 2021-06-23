@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.io.parsers import read_csv
 
 
 class Clean_Tweets:
@@ -25,7 +26,8 @@ class Clean_Tweets:
         """
         drop duplicate rows
         """
-        df = df.drop_duplicates(inplace=True)
+        df.drop_duplicates(inplace=True)
+        print(df)
 
         return df
 
@@ -35,7 +37,7 @@ class Clean_Tweets:
         """
 
         df['created_at'] = pd.to_datetime(
-            df['Datetime'])
+            df['created_at'])
 
         return df
 
@@ -60,3 +62,34 @@ class Clean_Tweets:
         df = df.drop(df[df['lang'] != 'en'].index)
 
         return df
+
+    def clean_data(self, df: pd.DataFrame, save) -> pd.DataFrame:
+
+        df = self.drop_duplicate(df)
+        df = self.convert_to_numbers(df)
+        df = self.remove_non_english_tweets(df)
+        df = self.drop_unwanted_column(df)
+        df = self.convert_to_datetime(df)
+
+        if save:
+            df.to_csv('cleaned_tweet_data.csv', index=False)
+            print('File Successfully Saved.!!!')
+
+        return df
+
+
+def read_processed_data(csv_path):
+
+    try:
+        df = pd.read_csv(csv_path)
+        print("file read as csv")
+    except FileNotFoundError:
+        print("file not found")
+
+
+if __name__ == "__main__":
+    proccessed_df = read_csv('processed_tweet_data.csv')
+    cleaner = Clean_Tweets(proccessed_df)
+    cleaner.clean_data(proccessed_df, save=True)
+    # cleaner.drop_duplicate(proccessed_df)
+    # print(proccessed_df)
