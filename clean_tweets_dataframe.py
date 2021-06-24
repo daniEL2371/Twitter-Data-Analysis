@@ -25,7 +25,7 @@ class Clean_Tweets:
         """
         drop duplicate rows
         """
-        df = df.drop_duplicates(inplace=True)
+        df.drop_duplicates(inplace=True)
 
         return df
 
@@ -35,7 +35,7 @@ class Clean_Tweets:
         """
 
         df['created_at'] = pd.to_datetime(
-            df['Datetime'])
+            df['created_at'])
 
         return df
 
