@@ -5,3 +5,4 @@
 Bug fixed
 Setup travis CI
 All tests has passed
+Check travis
