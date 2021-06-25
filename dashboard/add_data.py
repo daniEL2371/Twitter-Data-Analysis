@@ -3,6 +3,7 @@ import pandas as pd
 import mysql.connector as mysql
 from mysql.connector import Error
 
+
 def DBConnect(dbName=None):
     """
 
@@ -15,16 +16,21 @@ def DBConnect(dbName=None):
     -------
 
     """
-    conn = mysql.connect(host='localhost', user='root', password=os.getenv('mysqlPass'),
+    # conn = mysql.connect(host='localhost', user='root', password=os.getenv('mysqlPass'),
+    #                      database=dbName, buffered=True)
+
+    conn = mysql.connect(host='localhost', user='root', password='rootroot',
                          database=dbName, buffered=True)
     cur = conn.cursor()
     return conn, cur
+
 
 def emojiDB(dbName: str) -> None:
     conn, cur = DBConnect(dbName)
     dbQuery = f"ALTER DATABASE {dbName} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
     cur.execute(dbQuery)
     conn.commit()
+
 
 def createDB(dbName: str) -> None:
     """
@@ -47,6 +53,7 @@ def createDB(dbName: str) -> None:
     conn.commit()
     cur.close()
 
+
 def createTables(dbName: str) -> None:
     """
 
@@ -64,13 +71,12 @@ def createTables(dbName: str) -> None:
 
     """
     conn, cur = DBConnect(dbName)
-    sqlFile = 'day5_schema.sql'
+    sqlFile = 'schema.sql'
     fd = open(sqlFile, 'r')
     readSqlFile = fd.read()
     fd.close()
 
     sqlCommands = readSqlFile.split(';')
-
     for command in sqlCommands:
         try:
             res = cur.execute(command)
@@ -81,6 +87,7 @@ def createTables(dbName: str) -> None:
     cur.close()
 
     return
+
 
 def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -98,10 +105,9 @@ def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
     -------
 
     """
-    cols_2_drop = ['Unnamed: 0', 'timestamp', 'sentiment', 'possibly_sensitive', 'original_text']
     try:
-        df = df.drop(columns=cols_2_drop, axis=1)
-        df = df.fillna(0)
+        df = df.drop(["user_mentions"],
+                     axis='columns')
     except KeyError as e:
         print("Error:", e)
 
@@ -141,12 +147,12 @@ def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> Non
     df = preprocess_df(df)
 
     for _, row in df.iterrows():
-        sqlQuery = f"""INSERT INTO {table_name} (created_at, source, clean_text, polarity, subjectivity, language,
-                    favorite_count, retweet_count, original_author, screen_count, followers_count, friends_count,
-                    hashtags, user_mentions, place, place_coordinate)
-             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+        sqlQuery = f"""INSERT INTO {table_name} (created_at, source, original_text, polarity, subjectivity, lang,
+                    favorite_count, retweet_count, original_author, followers_count, friends_count, possibly_sensitive,
+                    hashtags, place, clean_text)
+             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         data = (row[0], row[1], row[2], row[3], (row[4]), (row[5]), row[6], row[7], row[8], row[9], row[10], row[11],
-                row[12], row[13], row[14], row[15])
+                row[12], row[13], row[14])
 
         try:
             # Execute the SQL command
@@ -158,6 +164,7 @@ def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> Non
             conn.rollback()
             print("Error: ", e)
     return
+
 
 def db_execute_fetch(*args, many=False, tablename='', rdf=True, **kwargs) -> pd.DataFrame:
     """
@@ -211,6 +218,7 @@ if __name__ == "__main__":
     emojiDB(dbName='tweets')
     createTables(dbName='tweets')
 
-    df = pd.read_csv('fintech.csv')
+    df = pd.read_csv('../cleaned_tweet_data.csv')
 
-    insert_to_tweet_table(dbName='tweets', df=df, table_name='TweetInformation')
+    insert_to_tweet_table(dbName='tweets', df=df,
+                          table_name='TweetInformation')
