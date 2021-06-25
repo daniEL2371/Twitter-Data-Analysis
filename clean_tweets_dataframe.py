@@ -48,7 +48,7 @@ class Clean_Tweets:
         df["subjectivity"] = pd.to_numeric(df["subjectivity"])
         df["retweet_count"] = pd.to_numeric(df["retweet_count"])
         df["favorite_count"] = pd.to_numeric(df["favorite_count"])
-        df["friends_count "] = pd.to_numeric(df["polarity"])
+#         df["friends_count "] = pd.to_numeric(df["friends_count"])
 
         return df
 
