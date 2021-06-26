@@ -184,48 +184,86 @@ class Dashboard:
         self.render_siderbar(['Data', "Data Visualizations"], "select page: ")
 
         if (self.page == "Data"):
+
             st.title("Data")
+            location = author = hashtag = lang = polarity = None
 
-            location = st.multiselect("choose Location of tweets", list(
-                self.df['place'].unique()))
-            lang = st.multiselect("choose Language of tweets",
-                                  list(self.df['lang'].unique()))
+            filters = st.sidebar.multiselect(
+                label="Choose filter", options=["location", "lang", "hashtags", "authors", "polarity"])
 
-            hashtag = st.text_input("Hashtag")
+            column_filters = st.multiselect(
+                "Choose columns to include", options=self.df.columns)
 
-            author = st.text_input("Author")
+            if ("location" in filters):
+                location = st.sidebar.multiselect("choose Location of tweets", list(
+                    self.df['place'].unique()))
 
-            polarity = st.selectbox("choose polarity score",
-                                    options=["None", "positive", "neutral", "negative"])
+            if ("lang" in filters):
+                lang = st.sidebar.multiselect("choose Language of tweets",
+                                              list(self.df['lang'].unique()))
+
+            if ("hashtags" in filters):
+                hashtag = st.sidebar.text_input("Hashtag")
+
+            if ("authors" in filters):
+                author = st.sidebar.text_input("Author")
+
+            if ("polarity" in filters):
+                polarity = st.sidebar.selectbox("choose polarity score",
+                                                options=["None", "positive", "neutral", "negative"])
 
             filtered_df = self.df
+
+            if (column_filters and len(column_filters) > 0):
+                try:
+                    filtered_df = self.df[column_filters]
+                except:
+                    pass
+
             if (location and len(location) > 0):
-                filtered_df = filtered_df[filtered_df['place'].apply(
-                    lambda x: x in location)]
+                try:
+                    filtered_df = filtered_df[filtered_df['place'].apply(
+                        lambda x: x in location)]
+                except:
+                    pass
 
             if (lang and len(lang) > 0):
-                filtered_df = filtered_df[filtered_df['lang'].apply(
-                    lambda x: x in lang)]
+                try:
+                    filtered_df = filtered_df[filtered_df['lang'].apply(
+                        lambda x: x in lang)]
+                except:
+                    pass
 
             if (hashtag):
-                filtered_df = filtered_df[filtered_df['hashtags'].apply(
-                    lambda x: "#" + hashtag in x.split(" ") or hashtag in x.split(" "))]
+                try:
+                    filtered_df = filtered_df[filtered_df['hashtags'].apply(
+                        lambda x: "#" + hashtag in x.split(" ") or hashtag in x.split(" "))]
+                except:
+                    pass
+
             if (author):
-                filtered_df = filtered_df[filtered_df['original_author'].apply(
-                    lambda x: x.lower().find(author.lower()) != -1)]
+                try:
+                    filtered_df = filtered_df[filtered_df['original_author'].apply(
+                        lambda x: x.lower().find(author.lower()) != -1)]
+                except:
+                    pass
 
             if (polarity):
-                if polarity == "None":
+
+                try:
+                    if polarity == "None":
+                        pass
+                    elif polarity == "positive":
+                        filtered_df = filtered_df[filtered_df['polarity'].apply(
+                            lambda x: x > 0)]
+                    elif polarity == "negative":
+                        filtered_df = filtered_df[filtered_df['polarity'].apply(
+                            lambda x: x < 0)]
+                    else:
+                        filtered_df = filtered_df[filtered_df['polarity'].apply(
+                            lambda x: x == 0)]
+                except:
                     pass
-                elif polarity == "positive":
-                    filtered_df = filtered_df[filtered_df['polarity'].apply(
-                        lambda x: x > 0)]
-                elif polarity == "negative":
-                    filtered_df = filtered_df[filtered_df['polarity'].apply(
-                        lambda x: x < 0)]
-                else:
-                    filtered_df = filtered_df[filtered_df['polarity'].apply(
-                        lambda x: x == 0)]
 
             st.write(filtered_df)
 
