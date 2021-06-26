@@ -185,23 +185,33 @@ class Dashboard:
 
         if (self.page == "Data"):
             st.title("Data")
+
             location = st.multiselect("choose Location of tweets", list(
                 self.df['place'].unique()))
             lang = st.multiselect("choose Language of tweets",
                                   list(self.df['lang'].unique()))
 
-            if location and not lang:
-                df = self.df[np.isin(self.df, location).any(axis=1)]
-                st.write(df)
-            elif lang and not location:
-                df = self.df[np.isin(self.df, lang).any(axis=1)]
-                st.write(df)
-            elif lang and location:
-                location.extend(lang)
-                df = self.df[np.isin(self.df, location).any(axis=1)]
-                st.write(df)
-            else:
-                st.write(self.df)
+            hashtag = st.text_input("Hashtag")
+
+            author = st.text_input("Author")
+
+            filtered_df = self.df
+            if (len(location) > 0):
+                filtered_df = filtered_df[filtered_df['place'].apply(
+                    lambda x: x in location)]
+
+            if (len(lang) > 0):
+                filtered_df = filtered_df[filtered_df['lang'].apply(
+                    lambda x: x in lang)]
+
+            if (hashtag):
+                filtered_df = filtered_df[filtered_df['hashtags'].apply(
+                    lambda x: "#" + hashtag in x.split(" ") or hashtag in x.split(" "))]
+            if (author):
+                filtered_df = filtered_df[filtered_df['original_author'].apply(
+                    lambda x: x.lower().find(author.lower()) != -1)]
+
+            st.write(filtered_df)
 
         elif (self.page == "Data Visualizations"):
             st.title("Data Visualizations")
