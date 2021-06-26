@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `TweetInformation`
     `friends_count` INT DEFAULT NULL,
     `possibly_sensitive` FLOAT DEFAULT NULL,
     `hashtags` TEXT DEFAULT NULL,
+    `user_mentions` TEXT DEFAULT NULL,
     `place` TEXT DEFAULT NULL,
     `clean_text` TEXT DEFAULT NULL,
 
