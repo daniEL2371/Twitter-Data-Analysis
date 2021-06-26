@@ -105,11 +105,19 @@ def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
     -------
 
     """
-    try:
-        df = df.drop(["user_mentions"],
-                     axis='columns')
-    except KeyError as e:
-        print("Error:", e)
+
+    df['possibly_sensitive'] = df['possibly_sensitive'].fillna(0)
+    df['place'] = df['place'].fillna(" ")
+
+    df['hashtags'] = df['hashtags'].fillna(" ")
+    df['user_mentions'] = df['user_mentions'].fillna(" ")
+
+    df['retweet_count'] = df['retweet_count'].fillna(0)
+    # try:
+    #     df = df.drop(["user_mentions"],
+    #                  axis='columns')
+    # except KeyError as e:
+    #     print("Error:", e)
 
     return df
 
@@ -149,10 +157,10 @@ def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> Non
     for _, row in df.iterrows():
         sqlQuery = f"""INSERT INTO {table_name} (created_at, source, original_text, polarity, subjectivity, lang,
                     favorite_count, retweet_count, original_author, followers_count, friends_count, possibly_sensitive,
-                    hashtags, place, clean_text)
-             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                    hashtags, user_mentions, place, clean_text)
+             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         data = (row[0], row[1], row[2], row[3], (row[4]), (row[5]), row[6], row[7], row[8], row[9], row[10], row[11],
-                row[12], row[13], row[14])
+                row[12], row[13], row[14], row[15])
 
         try:
             # Execute the SQL command
@@ -219,6 +227,7 @@ if __name__ == "__main__":
     createTables(dbName='tweets')
 
     df = pd.read_csv('../cleaned_tweet_data.csv')
+    df.info()
 
     insert_to_tweet_table(dbName='tweets', df=df,
                           table_name='TweetInformation')

@@ -94,7 +94,7 @@ class TweeterDataExplorator:
             return []
 
 
-st.set_page_config(page_title="Day 5", layout="wide")
+st.set_page_config(page_title="Tweet Data Information", layout="wide")
 
 
 def loadData():
@@ -136,7 +136,8 @@ class Dashboard:
         st.altair_chart(msgChart, use_container_width=True)
 
     def render_siderbar(self, pages, select_label):
-        self.page = st.sidebar.selectbox(f'{select_label}:', pages)
+        st.sidebar.markdown("# Pages")
+        self.page = st.sidebar.selectbox(f'{select_label}', pages)
 
     def render_top_authors(self):
         st.markdown("## Top authors")
@@ -183,7 +184,25 @@ class Dashboard:
         self.render_siderbar(['Data', "Data Visualizations"], "select page: ")
 
         if (self.page == "Data"):
-            st.write("Data")
+            st.title("Data")
+            location = st.multiselect("choose Location of tweets", list(
+                self.df['place'].unique()))
+            lang = st.multiselect("choose Language of tweets",
+                                  list(self.df['lang'].unique()))
+
+            if location and not lang:
+                df = self.df[np.isin(self.df, location).any(axis=1)]
+                st.write(df)
+            elif lang and not location:
+                df = self.df[np.isin(self.df, lang).any(axis=1)]
+                st.write(df)
+            elif lang and location:
+                location.extend(lang)
+                df = self.df[np.isin(self.df, location).any(axis=1)]
+                st.write(df)
+            else:
+                st.write(self.df)
+
         elif (self.page == "Data Visualizations"):
             st.title("Data Visualizations")
             self.render_visulazation()
