@@ -140,7 +140,7 @@ class Dashboard:
         self.page = st.sidebar.selectbox(f'{select_label}', pages)
 
     def render_top_authors(self):
-        st.markdown("## Top authors")
+        st.markdown("## **Top authors**")
 
         top = st.number_input(label="Top", step=1, value=5, key="top_authors")
         df_res = self.tweeterDataExplorator.authors(top=int(top))
@@ -149,7 +149,7 @@ class Dashboard:
                      use_container_width=True)
 
     def render_top_hashtags(self):
-        st.markdown("## Top hashtags")
+        st.markdown("## **Top hashtags** ")
 
         top = st.number_input(label="Top", step=1, value=5, key="top_hashtags")
         df_res = self.tweeterDataExplorator.most_used_hash_tag(top=int(top))
@@ -158,7 +158,7 @@ class Dashboard:
                      use_container_width=True)
 
     def render_polarity(self):
-        st.markdown("## Polarity score")
+        st.markdown("## **Polarity score**")
         df = self.tweeterDataExplorator.get_polarities_count()
 
         fig = px.pie(df, values="polarity_score",
@@ -167,17 +167,126 @@ class Dashboard:
 
         st.plotly_chart(fig)
 
+    def render_polarity_vs_retweet_count(self):
+        chart_df = pd.DataFrame(columns=["polarity", "retweet_count"])
+
+        chart_df['polarity'] = self.df['polarity']
+        print(chart_df)
+        chart_df['retweet_count'] = self.df['retweet_count']
+
+        # st.line_chart(chart_df)
+        pass
+
     def render_visulazation(self):
         self.render_top_hashtags()
         self.render_top_authors()
         self.render_polarity()
         self.render_word_cloud()
+        self.render_polarity_vs_retweet_count()
 
     def render_word_cloud(self):
-        st.markdown("## Tweet Text Word Cloud")
+        st.markdown("## **Tweet Text Word Cloud**")
+        authors = st.multiselect(
+            label="Author", options=self.df['original_author'].unique())
 
-        wc = wordCloud(self.df)
+        df = self.df
+        if (authors):
+            df = df.filter(self.df[self.df['original_author'].apply(
+                lambda x: x in authors)])
+
+        wc = wordCloud(df)
         st.image(wc.to_array())
+
+    def render_data_page(self):
+        location = author = hashtag = lang = polarity = user_mentions = None
+
+        filters = st.sidebar.multiselect(
+            label="Choose filter", options=["location", "lang", "hashtags", "authors", "polarity", "user_mentions"])
+
+        column_filters = st.multiselect(
+            "Choose columns to include", options=self.df.columns)
+
+        if ("location" in filters):
+            location = st.sidebar.multiselect("choose Location of tweets", list(
+                self.df['place'].unique()))
+
+        if ("lang" in filters):
+            lang = st.sidebar.multiselect("choose Language of tweets",
+                                          list(self.df['lang'].unique()))
+        if ("user_mentions" in filters):
+            user_mentions = st.sidebar.multiselect("choose user mentions of tweets",
+                                                   list(self.df['user_mentions'].unique()))
+        if ("hashtags" in filters):
+            hashtag = st.sidebar.multiselect(
+                "Hashtag", list(self.df['hashtags'].unique()))
+
+        if ("authors" in filters):
+            author = st.sidebar.text_input("Author")
+
+        if ("polarity" in filters):
+            polarity = st.sidebar.selectbox("choose polarity score",
+                                            options=["None", "positive", "neutral", "negative"])
+
+        filtered_df = self.df
+
+        if (column_filters and len(column_filters) > 0):
+            try:
+                filtered_df = self.df[column_filters]
+            except:
+                pass
+
+        if (location and len(location) > 0):
+            try:
+                filtered_df = filtered_df[filtered_df['place'].apply(
+                    lambda x: x in location)]
+            except:
+                pass
+
+        if (lang and len(lang) > 0):
+            try:
+                filtered_df = filtered_df[filtered_df['lang'].apply(
+                    lambda x: x in lang)]
+            except:
+                pass
+
+        if (hashtag):
+            try:
+                filtered_df = filtered_df[filtered_df['hashtags'].apply(
+                    lambda x: x in hashtag)]
+            except:
+                pass
+
+        if (user_mentions):
+            try:
+                filtered_df = filtered_df[filtered_df['user_mentions'].apply(
+                    lambda x: x in user_mentions)]
+            except:
+                pass
+        if (author):
+            try:
+                filtered_df = filtered_df[filtered_df['original_author'].apply(
+                    lambda x: x.lower().find(author.lower()) != -1)]
+            except:
+                pass
+
+        if (polarity):
+
+            try:
+                if polarity == "None":
+                    pass
+                elif polarity == "positive":
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x > 0)]
+                elif polarity == "negative":
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x < 0)]
+                else:
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x == 0)]
+            except:
+                pass
+
+        st.write(filtered_df)
 
     def render(self):
         st.title(f"Welcome To {self.title}")
@@ -186,86 +295,7 @@ class Dashboard:
         if (self.page == "Data"):
 
             st.title("Data")
-            location = author = hashtag = lang = polarity = None
-
-            filters = st.sidebar.multiselect(
-                label="Choose filter", options=["location", "lang", "hashtags", "authors", "polarity"])
-
-            column_filters = st.multiselect(
-                "Choose columns to include", options=self.df.columns)
-
-            if ("location" in filters):
-                location = st.sidebar.multiselect("choose Location of tweets", list(
-                    self.df['place'].unique()))
-
-            if ("lang" in filters):
-                lang = st.sidebar.multiselect("choose Language of tweets",
-                                              list(self.df['lang'].unique()))
-
-            if ("hashtags" in filters):
-                hashtag = st.sidebar.text_input("Hashtag")
-
-            if ("authors" in filters):
-                author = st.sidebar.text_input("Author")
-
-            if ("polarity" in filters):
-                polarity = st.sidebar.selectbox("choose polarity score",
-                                                options=["None", "positive", "neutral", "negative"])
-
-            filtered_df = self.df
-
-            if (column_filters and len(column_filters) > 0):
-                try:
-                    filtered_df = self.df[column_filters]
-                except:
-                    pass
-
-            if (location and len(location) > 0):
-                try:
-                    filtered_df = filtered_df[filtered_df['place'].apply(
-                        lambda x: x in location)]
-                except:
-                    pass
-
-            if (lang and len(lang) > 0):
-                try:
-                    filtered_df = filtered_df[filtered_df['lang'].apply(
-                        lambda x: x in lang)]
-                except:
-                    pass
-
-            if (hashtag):
-                try:
-                    filtered_df = filtered_df[filtered_df['hashtags'].apply(
-                        lambda x: "#" + hashtag in x.split(" ") or hashtag in x.split(" "))]
-                except:
-                    pass
-
-            if (author):
-                try:
-                    filtered_df = filtered_df[filtered_df['original_author'].apply(
-                        lambda x: x.lower().find(author.lower()) != -1)]
-                except:
-                    pass
-
-            if (polarity):
-
-                try:
-                    if polarity == "None":
-                        pass
-                    elif polarity == "positive":
-                        filtered_df = filtered_df[filtered_df['polarity'].apply(
-                            lambda x: x > 0)]
-                    elif polarity == "negative":
-                        filtered_df = filtered_df[filtered_df['polarity'].apply(
-                            lambda x: x < 0)]
-                    else:
-                        filtered_df = filtered_df[filtered_df['polarity'].apply(
-                            lambda x: x == 0)]
-                except:
-                    pass
-
-            st.write(filtered_df)
+            self.render_data_page()
 
         elif (self.page == "Data Visualizations"):
             st.title("Data Visualizations")
