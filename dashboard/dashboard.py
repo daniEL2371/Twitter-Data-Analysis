@@ -195,12 +195,15 @@ class Dashboard:
 
             author = st.text_input("Author")
 
+            polarity = st.selectbox("choose polarity score",
+                                    options=["None", "positive", "neutral", "negative"])
+
             filtered_df = self.df
-            if (len(location) > 0):
+            if (location and len(location) > 0):
                 filtered_df = filtered_df[filtered_df['place'].apply(
                     lambda x: x in location)]
 
-            if (len(lang) > 0):
+            if (lang and len(lang) > 0):
                 filtered_df = filtered_df[filtered_df['lang'].apply(
                     lambda x: x in lang)]
 
@@ -210,6 +213,19 @@ class Dashboard:
             if (author):
                 filtered_df = filtered_df[filtered_df['original_author'].apply(
                     lambda x: x.lower().find(author.lower()) != -1)]
+
+            if (polarity):
+                if polarity == "None":
+                    pass
+                elif polarity == "positive":
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x > 0)]
+                elif polarity == "negative":
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x < 0)]
+                else:
+                    filtered_df = filtered_df[filtered_df['polarity'].apply(
+                        lambda x: x == 0)]
 
             st.write(filtered_df)
 
