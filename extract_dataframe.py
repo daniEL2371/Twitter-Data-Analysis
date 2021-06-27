@@ -69,7 +69,7 @@ class TweetDfExtractor:
 
     def find_source(self) -> list:
         source = [tw.get('source', None) for tw in self.tweets_list]
-
+        
         return source
 
     def find_screen_name(self) -> list:
@@ -111,13 +111,42 @@ class TweetDfExtractor:
         return retweet_count
 
     def find_hashtags(self) -> list:
-        hashtags = [tw.get('entities', {}).get('hashtags', None)
+        all_hashtag_objs = [tw.get('entities', {}).get('hashtags', None)
                     for tw in self.tweets_list]
-        return hashtags
+        hash_tags = []
+        for hashtag_list_obj in all_hashtag_objs:
+            if (hashtag_list_obj):
+                cur_hashtags = []
+                for hashtag_obj in hashtag_list_obj:
+                    try:
+                        cur_hashtags.append(hashtag_obj['text'])
+                    except KeyError:
+                        pass
+                hash_tags.append(" ".join(cur_hashtags))
+            else:
+                hash_tags.append(None)
+
+        return hash_tags
+
 
     def find_mentions(self) -> list:
-        mentions = [tw.get('entities', {}).get('user_mentions', None)
+        all_mentions_objs = [tw.get('entities', {}).get('user_mentions', None)
                     for tw in self.tweets_list]
+
+        mentions = []
+        for mention_list_obj in all_mentions_objs:
+            if (mention_list_obj):
+                cur_mentions = []
+
+                for mention_obj in mention_list_obj:
+                    try:
+                        cur_mentions.append(mention_obj['screen_name'])
+                    except KeyError:
+                        pass
+                mentions.append(" ".join(cur_mentions))
+            else:
+                mentions.append(None)
+
         return mentions
 
     def find_location(self) -> list:
@@ -167,7 +196,7 @@ if __name__ == "__main__":
                'original_author', 'screen_count', 'followers_count', 'friends_count', 'possibly_sensitive', 'hashtags', 'user_mentions', 'place', 'place_coord_boundaries']
     _, tweet_list = read_json("./data/covid19.json")
     tweet = TweetDfExtractor(tweet_list)
-    tweet_df = tweet.get_tweet_df(save=True)
+    tweet_df = tweet.get_tweet_df(save=False)
     tweet.find_statuses_count()
 
     # use all defined functions to generate a dataframe with the specified columns above
