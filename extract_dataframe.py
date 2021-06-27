@@ -74,8 +74,7 @@ class TweetDfExtractor:
         for tag in source_tags:
             match = re.search(r'href=[\'"]?([^\'" >]+)', tag)
             links.append(match.group(1))
-        for l in links:
-            print(l)
+        
         return links
 
     def find_screen_name(self) -> list:
@@ -202,7 +201,7 @@ if __name__ == "__main__":
                'original_author', 'screen_count', 'followers_count', 'friends_count', 'possibly_sensitive', 'hashtags', 'user_mentions', 'place', 'place_coord_boundaries']
     _, tweet_list = read_json("./data/covid19.json")
     tweet = TweetDfExtractor(tweet_list)
-    tweet_df = tweet.get_tweet_df(save=False)
+    tweet_df = tweet.get_tweet_df(save=True)
     tweet.find_statuses_count()
 
     # use all defined functions to generate a dataframe with the specified columns above
