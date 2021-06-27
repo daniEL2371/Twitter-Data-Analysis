@@ -34,15 +34,15 @@ class Dashboard:
     def __init__(self, title: str) -> None:
         self.title = title
         self.page = None
-        self.df = self.load_data()
+        self.df = self.load_data().copy(deep=True)
         self.tweeterDataExplorator = TweeterDataExplorator(self.df)
 
-    @st.cache
+    @st.cache()
     def load_data(self):
         print("Data loaded")
         query = "select * from TweetInformation"
         df = db_execute_fetch(query, dbName="tweets", rdf=True)
-        return df
+        return df.copy(deep=True)
 
     def barChart(self, data, X, Y):
 

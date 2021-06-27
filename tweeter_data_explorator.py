@@ -38,9 +38,21 @@ class TweeterDataExplorator:
             self.text_category)
         value_counts = df['score'].value_counts()
         
-        pos_count = value_counts['positive']
-        neg_count = value_counts['negative']
-        neu_count = value_counts['neutral']
+        pos_count = neg_count = neu_count = 0
+        try:
+            pos_count = value_counts['positive']
+        except:
+            pos_count = 0
+        
+        try:
+            neg_count = value_counts['negative']
+        except:
+            neg_count = 0
+        
+        try:
+            neu_count = value_counts['neutral']
+        except:
+            neu_count = 0
         
         polarity_score_df['Polarity'] = ['negative', 'positive', 'neutral']
         polarity_score_df['Count'] = [neg_count, pos_count, neu_count]
