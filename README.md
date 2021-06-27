@@ -3,12 +3,19 @@
 ### What is done
 
 A. Data Extraction
+
 B. Data Preprocessing
+
 C. Data Exploration and Visualzation
+
 D. Data Preparation
+
 E. Data Modeling
+
 F. Dashboard
+
 G. Testing
+
 H. Travis CI integration
 
 
@@ -21,14 +28,15 @@ H. Travis CI integration
 1. notebooks/dataPreProcessing.ipynb: 
 
     A. Cleaning
-    
-      - cleans the processed_tweet_data.csv and saves the cleaned dataframe in a file called    
+        
+        - cleans the processed_tweet_data.csv and saves the cleaned dataframe in a file called    
         cleaned_tweet_data.csv
-      - imports clean_tweet_dataframe.py and uses its method to clean the dataframe
+        
+        - imports clean_tweet_dataframe.py and uses its method to clean the dataframe
     
     B. Exploration
     
-      - Data exploration is also done inside this note book
+        - Data exploration is also done inside this note book
 
 #### Data Preparation and Data Modeling
 
@@ -60,7 +68,8 @@ H. Travis CI integration
 #### tests
 
 1. test_clean_tweets_dataframe.py:  unit test for clean_tweets_dataframe.py
-2. test_extract_dataframe.py: unit test for extract_dataframe.py
+
+3. test_extract_dataframe.py: unit test for extract_dataframe.py
 
 #### CI automation
 
