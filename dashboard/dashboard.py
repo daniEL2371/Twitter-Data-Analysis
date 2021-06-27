@@ -34,15 +34,15 @@ class Dashboard:
     def __init__(self, title: str) -> None:
         self.title = title
         self.page = None
-        self.df = self.load_data()
+        self.df = self.load_data().copy(deep=True)
         self.tweeterDataExplorator = TweeterDataExplorator(self.df)
 
-    @st.cache
+    @st.cache()
     def load_data(self):
         print("Data loaded")
         query = "select * from TweetInformation"
         df = db_execute_fetch(query, dbName="tweets", rdf=True)
-        return df
+        return df.copy(deep=True)
 
     def barChart(self, data, X, Y):
 
@@ -88,9 +88,9 @@ class Dashboard:
             label="Select location to include", options=self.df['place'].unique(), key="polarity_places")
         df = self.tweeterDataExplorator.get_polarities_count(
             places=plcae_filters)
-
-        fig = px.pie(df, values="polarity_score",
-                     names="polarity_score", width=500, height=350)
+        
+        fig = px.pie(df, values="Count",
+                     names="Polarity", width=500, height=400)
         fig.update_traces(textposition='inside', textinfo='percent+label')
 
         st.plotly_chart(fig)
