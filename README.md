@@ -29,19 +29,24 @@ H. Travis CI integration
 #### Data Preparation and Data Modeling
 
 1 notebooks/modelGeneration.ipynb 
-    A. Sentiment Analysis: Using the cleaned_tweet_data.csv, Data is prepared for sentiment     analysis and Sentiment Analysis model is implemented using SGD classifier.
-
-    B. Topic Modeling: Using the cleaned_tweet_data.csv, Data is prepared for Topic     Modeling and Topic Modeling model is implemented using Latent Dirichlet Allocation
+    A. Sentiment Analysis: Using the cleaned_tweet_data.csv, Data is prepared for sentiment analysis and Sentiment Analysis model is implemented using SGD classifier.
+    B. Topic Modeling: Using the cleaned_tweet_data.csv, Data is prepared for Topic Modeling and Topic Modeling model is implemented using Latent Dirichlet Allocation
 
 #### Dashboard
 
-1. add_data.py: Connects to a database, creates tweets db, creates TweetInformation table and inserts a dataframe from cleaned_tweet_data.csv.
-   ***Note: Replace your db username and db password inside this file in DBConnect method ***
+1. add_data.py:
+        Connects to a database,
+        creates tweets db,
+        creates TweetInformation table and inserts a dataframe from cleaned_tweet_data.csv.
+   
+  
+  ***Note: Replace your db username and db password inside this file in DBConnect method ***
 
 2. schema.sql: A schema Describing A TweetInformation Table
 
 3. dashboard.py: A dashoard is implemeted using streamlit. The dashboard has two pages for Data Visualzation.
 
+    
     ***Note: dashboard.py imports tweeter_data_explorator.py which has several helpers method to explore the data ***
 
 #### tests
