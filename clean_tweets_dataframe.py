@@ -51,6 +51,19 @@ class Clean_Tweets:
 #         df["friends_count "] = pd.to_numeric(df["friends_count"])
 
         return df
+    
+    def handle_missing_values(self, df: pd.DataFrame) ->  pd.DataFrame:
+        """
+            handle missing values
+        """
+        
+        df['possibly_sensitive'] = df['possibly_sensitive'].fillna(0)
+        df['place'] = df['place'].fillna(" ")
+        df['hashtags'] = df['hashtags'].fillna(" ")
+        df['user_mentions'] = df['user_mentions'].fillna(" ")
+        df['retweet_count'] = df['retweet_count'].fillna(0)
+        
+        return df
 
     def remove_non_english_tweets(self, df: pd.DataFrame) -> pd.DataFrame:
         """
