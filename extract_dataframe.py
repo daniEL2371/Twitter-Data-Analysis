@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 from textblob import TextBlob
-
+import re
 
 def read_json(json_file: str) -> list:
     """
@@ -68,9 +68,15 @@ class TweetDfExtractor:
         return created_at
 
     def find_source(self) -> list:
-        source = [tw.get('source', None) for tw in self.tweets_list]
+        source_tags = [tw.get('source', None) for tw in self.tweets_list]
         
-        return source
+        links = []
+        for tag in source_tags:
+            match = re.search(r'href=[\'"]?([^\'" >]+)', tag)
+            links.append(match.group(1))
+        for l in links:
+            print(l)
+        return links
 
     def find_screen_name(self) -> list:
         screen_name = [tw.get('user', {}).get('screen_name', None)
