@@ -5,93 +5,13 @@ import altair as alt
 from wordcloud import WordCloud
 from add_data import db_execute_fetch
 import plotly.express as px
+import os
+import sys
 
-import re
+sys.path.append(os.path.abspath(os.path.join('..')))
 
+from tweeter_data_explorator import TweeterDataExplorator
 
-class TweeterDataExplorator:
-
-    def __init__(self, df):
-
-        self.df = df
-
-    def read_head(self):
-        return self.df.head()
-
-    # returning the number of rows columns and column information
-    def get_info(self):
-        row_count, col_count = self.df.shape
-
-        print(f"Number of rows: {row_count}")
-        print(f"Number of columns: {col_count}")
-
-        return (row_count, col_count), self.df.info()
-
-    # gets number of distnict values in a given coumn
-    def get_count(self, column_name):
-        return self.df[column_name].value_counts()
-
-    # returns the number of negative polarities, neutral polarities and positive polarities in a dict
-    def get_polarities_count(self):
-        polarity_score_df = pd.DataFrame(columns=['polarity_score'])
-        polarity_score_df['polarity_score'] = self.df['polarity'].apply(
-            self.text_category)
-        return polarity_score_df['polarity_score'].value_counts().rename_axis('polarity_score').to_frame('polarity_score')
-
-    # constructs a hashtag data frame for every tweets and returns it
-
-    def get_hash_tag_df(self):
-        hash_tags = self.df.clean_text.apply(self.__find_hashtags)
-
-        flattened_hash_tags = []
-
-        for hash_tag_list in hash_tags:
-            for hash_tag in hash_tag_list:
-                flattened_hash_tags.append(hash_tag)
-
-        hashtag_df = pd.DataFrame(columns=['hashtag'])
-        hashtag_df['hashtag'] = flattened_hash_tags
-
-        return hashtag_df
-
-    #  this returns the value count of top hash tags used in a data frame
-    # if top is not specifed, it returns with a value count of every hashtag used
-    def most_used_hash_tag(self, top=None):
-        return self.get_hash_tag_df()['hashtag'].value_counts().head(top).rename_axis('hashtags').to_frame('counts')
-
-    def visualze_polarity(self):
-        return
-
-    # returns value count of top language used
-    # if top is not specifed, it returns with a value count of language of every language used
-
-    def most_used_language(self, top=None):
-        return self.df['lang'].value_counts().head(top)
-
-    # returns value count of top users tweeted
-    # if top is not specifed, it returns with a value count of language of every users who tweeted
-    def authors(self, top=None):
-
-        return self.df['original_author'].value_counts().head(top)
-
-    def most_retweeted_tweet(self):
-        pass
-
-    def text_category(self, p: float) -> str:
-        if p > 0:
-            return "positive"
-        elif p == 0:
-            return "neutral"
-        else:
-            return "negative"
-    # private function that finds hash tags from a text
-
-    def __find_hashtags(self, tweet):
-
-        try:
-            return re.findall('(#[A-Za-z]+[A-Za-z0-9-_]+)', tweet)
-        except:
-            return []
 
 
 st.set_page_config(page_title="Tweet Data Information", layout="wide")
@@ -104,8 +24,8 @@ def loadData():
 
 
 def wordCloud(df):
-    df = loadData()
     cleanText = ''
+
     for text in df['clean_text']:
         tokens = str(text).lower().split()
 
@@ -129,7 +49,7 @@ class Dashboard:
         df = db_execute_fetch(query, dbName="tweets", rdf=True)
         return df
 
-    def barChart(self, data, title, X, Y):
+    def barChart(self, data, X, Y):
 
         msgChart = (alt.Chart(data).mark_bar().encode(alt.X(f"{X}:N", sort=alt.EncodingSortField(field=f"{Y}", op="values",
                     order='ascending')), y=f"{Y}:Q"))
@@ -140,26 +60,39 @@ class Dashboard:
         self.page = st.sidebar.selectbox(f'{select_label}', pages)
 
     def render_top_authors(self):
-        st.markdown("## **Top authors**")
+        st.markdown("### **Top authors**")
+
+        plcae_filters = st.multiselect(
+            label="Select location to include", options=self.df['place'].unique(), key="author_places")
 
         top = st.number_input(label="Top", step=1, value=5, key="top_authors")
-        df_res = self.tweeterDataExplorator.authors(top=int(top))
+
+        df_res = self.tweeterDataExplorator.authors(
+            top=int(top), places=plcae_filters)
 
         st.bar_chart(data=df_res, width=0, height=0,
                      use_container_width=True)
 
     def render_top_hashtags(self):
-        st.markdown("## **Top hashtags** ")
+        st.markdown("### **Top hashtags** ")
+
+        plcae_filters = st.multiselect(
+            label="Select location to include", options=self.df['place'].unique())
 
         top = st.number_input(label="Top", step=1, value=5, key="top_hashtags")
-        df_res = self.tweeterDataExplorator.most_used_hash_tag(top=int(top))
+        df_res = self.tweeterDataExplorator.most_used_hash_tag(
+            top=int(top), places=plcae_filters)
 
         st.bar_chart(data=df_res, width=0, height=0,
                      use_container_width=True)
 
     def render_polarity(self):
-        st.markdown("## **Polarity score**")
-        df = self.tweeterDataExplorator.get_polarities_count()
+        st.markdown("### **Polarity score**")
+
+        plcae_filters = st.multiselect(
+            label="Select location to include", options=self.df['place'].unique(), key="polarity_places")
+        df = self.tweeterDataExplorator.get_polarities_count(
+            places=plcae_filters)
 
         fig = px.pie(df, values="polarity_score",
                      names="polarity_score", width=500, height=350)
@@ -171,7 +104,6 @@ class Dashboard:
         chart_df = pd.DataFrame(columns=["polarity", "retweet_count"])
 
         chart_df['polarity'] = self.df['polarity']
-        print(chart_df)
         chart_df['retweet_count'] = self.df['retweet_count']
 
         # st.line_chart(chart_df)
@@ -186,13 +118,43 @@ class Dashboard:
 
     def render_word_cloud(self):
         st.markdown("## **Tweet Text Word Cloud**")
-        authors = st.multiselect(
-            label="Author", options=self.df['original_author'].unique())
+
+        authors = places = polarity_score = []
+
+        filter_mtd = st.selectbox(label="select filter method", options=[
+                                  "Location", "Authors", "Polarity Score"])
+
+        if (filter_mtd and filter_mtd == "Location"):
+            places = st.multiselect(
+                label="Location", options=self.df['place'].unique(), key="plcae_wc")
+        if (filter_mtd and filter_mtd == "Authors"):
+            authors = st.multiselect(
+                label="Authors", options=self.df['original_author'].unique(), key="authros_wc")
+        if (filter_mtd and filter_mtd == "Polarity Score"):
+            polarity_score = st.selectbox(
+                label="Polarity Score", options=["None", "Positive", "Neutral", "Negative"], key="authros_wc")
 
         df = self.df
-        if (authors):
-            df = df.filter(self.df[self.df['original_author'].apply(
-                lambda x: x in authors)])
+
+        if (places and len(places) > 0):
+            df = df[df['place'].apply(
+                lambda x: x in places)]
+
+        if (authors and len(authors) > 0):
+            df = df[df['original_author'].apply(
+                lambda x: x in authors)]
+
+        if (polarity_score and len(polarity_score) > 0):
+
+            if polarity_score == "Positive":
+                df = df[df['polarity'].apply(
+                    lambda x: x > 0)]
+            elif polarity_score == "Negative":
+                df = df[df['polarity'].apply(
+                    lambda x: x < 0)]
+            elif polarity_score == "Neutral":
+                df = df[df['polarity'].apply(
+                    lambda x: x == 0)]
 
         wc = wordCloud(df)
         st.image(wc.to_array())
@@ -300,8 +262,6 @@ class Dashboard:
         elif (self.page == "Data Visualizations"):
             st.title("Data Visualizations")
             self.render_visulazation()
-
-        print(self.page)
 
 
 if __name__ == "__main__":
