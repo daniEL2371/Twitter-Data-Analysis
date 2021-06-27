@@ -68,14 +68,9 @@ class TweetDfExtractor:
         return created_at
 
     def find_source(self) -> list:
-        source_tags = [tw.get('source', None) for tw in self.tweets_list]
-        
-        links = []
-        for tag in source_tags:
-            match = re.search(r'href=[\'"]?([^\'" >]+)', tag)
-            links.append(match.group(1))
-        
-        return links
+        source = [tw.get('source', None) for tw in self.tweets_list]
+            
+        return source
 
     def find_screen_name(self) -> list:
         screen_name = [tw.get('user', {}).get('screen_name', None)
