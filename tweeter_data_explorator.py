@@ -29,14 +29,23 @@ class TweeterDataExplorator:
     # returns the number of negative polarities, neutral polarities and positive polarities in a dict
     def get_polarities_count(self, places=[]):
         df = self.df
-        polarity_score_df = pd.DataFrame(columns=['polarity_score'])
+        polarity_score_df = pd.DataFrame(columns=['Polarity', 'Count'])
 
         if (places and len(places) > 0):
             df = df[df['place'].apply(
                 lambda x: x in places)]
-        polarity_score_df['polarity_score'] = df['polarity'].apply(
+        df['score'] = df['polarity'].apply(
             self.text_category)
-        return polarity_score_df['polarity_score'].value_counts().rename_axis('polarity_score').to_frame('polarity_score')
+        value_counts = df['score'].value_counts()
+        
+        pos_count = value_counts['positive']
+        neg_count = value_counts['negative']
+        neu_count = value_counts['neutral']
+        
+        polarity_score_df['Polarity'] = ['negative', 'positive', 'neutral']
+        polarity_score_df['Count'] = [neg_count, pos_count, neu_count]
+        
+        return polarity_score_df
 
     # constructs a hashtag data frame for every tweets and returns it
 

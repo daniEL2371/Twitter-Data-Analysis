@@ -88,9 +88,9 @@ class Dashboard:
             label="Select location to include", options=self.df['place'].unique(), key="polarity_places")
         df = self.tweeterDataExplorator.get_polarities_count(
             places=plcae_filters)
-
-        fig = px.pie(df, values="polarity_score",
-                     names="polarity_score", width=500, height=350)
+        
+        fig = px.pie(df, values="Count",
+                     names="Polarity", width=500, height=400)
         fig.update_traces(textposition='inside', textinfo='percent+label')
 
         st.plotly_chart(fig)
