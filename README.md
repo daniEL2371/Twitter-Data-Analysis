@@ -19,11 +19,15 @@ H. Travis CI integration
 #### Data Preprocessing
 
 1. notebooks/dataPreProcessing.ipynb: 
+
     A. Cleaning
+    
       - cleans the processed_tweet_data.csv and saves the cleaned dataframe in a file called    
         cleaned_tweet_data.csv
       - imoprts clean_tweet_dataframe.py and uses its method to clean the dataframe
+    
     B. Exploration
+    
        - Data exploration is also done inside this note book
 
 #### Data Preparation and Data Modeling
