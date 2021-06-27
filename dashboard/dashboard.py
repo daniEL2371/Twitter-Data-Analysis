@@ -16,13 +16,6 @@ from tweeter_data_explorator import TweeterDataExplorator
 
 st.set_page_config(page_title="Tweet Data Information", layout="wide")
 
-
-def loadData():
-    query = "select * from TweetInformation"
-    df = db_execute_fetch(query, dbName="tweets", rdf=True)
-    return df
-
-
 def wordCloud(df):
     cleanText = ''
 
@@ -44,7 +37,9 @@ class Dashboard:
         self.df = self.load_data()
         self.tweeterDataExplorator = TweeterDataExplorator(self.df)
 
+    @st.cache
     def load_data(self):
+        print("Data loaded")
         query = "select * from TweetInformation"
         df = db_execute_fetch(query, dbName="tweets", rdf=True)
         return df
