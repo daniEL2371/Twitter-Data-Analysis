@@ -24,21 +24,25 @@ H. Travis CI integration
     
       - cleans the processed_tweet_data.csv and saves the cleaned dataframe in a file called    
         cleaned_tweet_data.csv
-      - imoprts clean_tweet_dataframe.py and uses its method to clean the dataframe
+      - imports clean_tweet_dataframe.py and uses its method to clean the dataframe
     
     B. Exploration
     
-       - Data exploration is also done inside this note book
+      - Data exploration is also done inside this note book
 
 #### Data Preparation and Data Modeling
 
-1 notebooks/modelGeneration.ipynb 
+1 notebooks/modelGeneration.ipynb
+
     A. Sentiment Analysis: Using the cleaned_tweet_data.csv, Data is prepared for sentiment analysis and Sentiment Analysis model is implemented using SGD classifier.
+    
     B. Topic Modeling: Using the cleaned_tweet_data.csv, Data is prepared for Topic Modeling and Topic Modeling model is implemented using Latent Dirichlet Allocation
+    
 
 #### Dashboard
 
 1. add_data.py:
+
         Connects to a database,
         creates tweets db,
         creates TweetInformation table and inserts a dataframe from cleaned_tweet_data.csv.
